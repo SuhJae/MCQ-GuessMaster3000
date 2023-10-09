@@ -2,7 +2,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import seaborn as sns
 from matplotlib.font_manager import FontProperties
-import math
+from scipy.stats import norm
 
 
 def get_distribution_parameters(m, n):
@@ -36,9 +36,9 @@ def plot_distribution(m, n):
     plt.plot(x, y, lw=2)
 
     # Highlight mean and standard deviations
-    plt.axvline(x=mean, color='grey', linestyle='--', lw=1)
-    plt.axvline(x=mean - std_dev, color='grey', linestyle='--', lw=1)
-    plt.axvline(x=mean + std_dev, color='grey', linestyle='--', lw=1)
+    plt.axvline(x=mean, color='grey', linestyle='--', lw=1, ymax=0.95)
+    plt.axvline(x=mean - std_dev, color='grey', linestyle='--', lw=1, ymax=0.95)
+    plt.axvline(x=mean + std_dev, color='grey', linestyle='--', lw=1, ymax=0.95)
 
     # Label vertical lines
     plt.text(mean, max(y) * 1.05, 'Mean', horizontalalignment='center', fontproperties=font)
@@ -51,6 +51,15 @@ def plot_distribution(m, n):
     plt.xticks(fontproperties=font)
     plt.yticks(fontproperties=font)
 
+    # Calculate probability of getting above 60% marks
+    cutoff_score = 0.6 * m
+    prob_60_or_above = 1 - norm.cdf(cutoff_score, mean, std_dev)
+
+    # Highlight the 60% cutoff and display the probability
+    plt.axvline(x=cutoff_score, color='red', linestyle='--', lw=1, ymax=0.9)
+    plt.text(cutoff_score, max(y) * 1.05, 'Above F', horizontalalignment='center', fontproperties=font, color='red')
+    plt.text(cutoff_score, max(y) * 1.00, '{:.2%}'.format(prob_60_or_above), horizontalalignment='center', fontproperties=font, color='red')
+
     # Set y-axis and x-axis limits to start from 0
     plt.ylim(0, max(y) * 1.1)
     plt.xlim(0, m)
@@ -58,10 +67,9 @@ def plot_distribution(m, n):
     # Removing the spines for minimalism
     sns.despine()
 
-    # Calculate probability of getting above 60% marks
-
     print("Mean: ", mean)
     print("Standard Deviation: ", std_dev.round(2))
+    print(f"Don't worry! You still have a {prob_60_or_above:.2%} chance of not failing!")
 
     plt.savefig("plot.png", dpi=300)
     plt.show()
